@@ -1,0 +1,47 @@
+begin_array -> ws "[" ws;
+end_array -> ws "]" ws;
+value_separator -> ws "," ws;
+
+array ->
+    begin_array (value (value_separator value)*)? end_array;
+
+value -> primitive_values;
+
+primitive_values ->
+    true /
+    false /
+    null /
+    undefined /
+    number /
+    string;
+
+false -> "false";
+null  -> "null";
+undefined  -> "undefined";
+true  -> "true";
+
+number -> minus? int frac? exp?;
+decimal_point -> ".";
+digit1_9 -> [1-9];
+e -> [eE];
+exp -> e (minus / plus)? DIGIT+;
+frac -> decimal_point DIGIT+;
+int -> zero / (digit1_9 DIGIT*);
+minus -> "-";
+plus -> "+";
+zero -> "0";
+
+string -> quotation_mark char* quotation_mark;
+
+char ->
+    unescaped /
+    (escape ("\"" / "\\" / "/" / "b" / "f" / "n" / "r" / "t" / ("u" HEXDIG HEXDIG HEXDIG HEXDIG)));
+
+escape -> "\\";
+quotation_mark -> "\"";
+unescaped -> [^\0-\x1F\x22\x5C];
+
+DIGIT  -> [0-9];
+HEXDIG -> [0-9a-fA-F];
+
+ws -> [ \n\r]*;
