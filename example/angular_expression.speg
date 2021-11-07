@@ -1,13 +1,13 @@
 GRAMMAR angular_expression
 
 root         -> expression* EOF; 
-expression   -> start_exp ws? (conditional / condition / binary / literal_map / property_array / method / value) ws? pipe? ws? end_exp;
+expression   -> start_exp ws (conditional / condition / binary / literal_map / property_array / method / value) ws pipe? ws end_exp;
 start_exp    -> "{{";
 end_exp      -> "}}";
 
-conditional  -> ws? (condition / binary / method / value) ws? "?" ws? trueExp ws? ":" ws? falseExp ws?;
+conditional  -> ws (condition / binary / method / value) ws "?" ws trueExp ws ":" ws falseExp ws;
 
-condition ->  (binary / method / value) ws? condition_operation ws? (binary / method / value);
+condition ->  (binary / method / value) ws condition_operation ws (binary / method / value);
 condition_operation -> "===" / "==" / "!==" / "!=" / ">" / "<" ;
 
 trueExp -> conditional / binary / method / value;
@@ -16,22 +16,23 @@ falseExp -> conditional / binary / method / value;
 method -> (method_call / method_call_with_args) ;
 method_call -> property_read "()" property_keyread_reader?;
 method_call_with_args -> property_read "(" method_args ")";
-method_args -> condition / binary / value;
+method_args -> method_arg (value_separator method_arg)*;
+method_arg -> conditional / binary / method / value;
 
 value ->
    primitive_values / property_read / array / literal_map / literal_map_empty;
 
-binary -> left ws? (operation ws? right)+;
+binary -> left ws (operation ws right)+;
 left -> method / value / ("(" binary ")") / binary;
 right -> method / value / ("(" binary ")") / binary;
 
 pipe -> pipe_literal+;
-pipe_literal -> "|" ws? pipe_name ws? (":" pipe_args)? ws?;
+pipe_literal -> "|" ws pipe_name ws (":" pipe_args)? ws;
 pipe_name -> [A-Za-z0-9]+;
 pipe_args -> value;
 
-literal_map -> "{" ws? string ws? ":" ws? value ws? "}";
-literal_map_empty -> "{" ws? "}";
+literal_map -> "{" ws string ws ":" ws value ws "}";
+literal_map_empty -> "{" ws "}";
 
 begin_array -> ws "[" ws;
 end_array -> ws "]" ws;
