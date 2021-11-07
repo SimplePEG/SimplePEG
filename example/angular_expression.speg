@@ -1,0 +1,88 @@
+GRAMMAR angular_expression
+
+root         -> expression* EOF; 
+expression   -> start_exp ws? (conditional / condition / binary / literal_map / property_array / value) ws? pipe? ws? end_exp;
+start_exp    -> "{{";
+end_exp      -> "}}";
+
+conditional  -> ws? (condition / binary / value) ws? "?" ws? trueExp ws? ":" ws? falseExp ws?;
+
+condition ->  (binary / value) ws? condition_operation ws? (binary / value);
+condition_operation -> "===" / "==" / "!==" / "!=" / ">" / "<" ;
+
+trueExp -> conditional / binary / value;
+falseExp -> conditional / binary / value;
+
+value ->
+   primitive_values / property_read / array / literal_map / literal_map_empty;
+
+binary -> left ws? (operation ws? right)+;
+left -> value / ("(" binary ")") / binary;
+right -> value / ("(" binary ")") / binary;
+
+pipe -> pipe_literal+;
+pipe_literal -> "|" ws? pipe_name ws? (":" pipe_args)? ws?;
+pipe_name -> [A-Za-z0-9]+;
+pipe_args -> value;
+
+literal_map -> "{" ws? string ws? ":" ws? value ws? "}";
+literal_map_empty -> "{" ws? "}";
+
+begin_array -> ws "[" ws;
+end_array -> ws "]" ws;
+value_separator -> ws "," ws;
+
+array ->
+    begin_array (value (value_separator value)*)? end_array;
+    
+property_array -> 
+    begin_array ((conditional / value ) (value_separator (conditional / value))*)? end_array;
+
+primitive_values ->
+    true /
+    false /
+    null /
+    undefined /
+    number /
+    string;
+
+false -> "false";
+null  -> "null";
+undefined  -> "undefined";
+true  -> "true";
+
+number -> minus? int frac? exp?;
+decimal_point -> ".";
+digit1_9 -> [1-9];
+e -> [eE];
+exp -> e (minus / plus)? DIGIT+;
+frac -> decimal_point DIGIT+;
+int -> zero / (digit1_9 DIGIT*);
+minus -> "-";
+plus -> "+";
+divider -> "/";
+multi -> "*";
+zero -> "0";
+
+operation -> minus / plus / divider / multi;
+
+
+property_read -> property_keyread / property_literal;
+string -> quotation_mark char* quotation_mark;
+property_literal -> [A-Za-z0-9_.]+;
+property_keyread -> property_literal "[" property_keyread_key "]";
+property_keyread_key -> string / DIGIT+;
+
+char ->
+    unescaped /
+    (escape ("\"" / "\\" / "/" / "b" / "f" / "n" / "r" / "t" / ("u" HEXDIG HEXDIG HEXDIG HEXDIG)));
+
+escape -> "\\";
+quotation_mark -> "\"";
+unescaped -> [^\0-\x1F\x22\x5C];
+
+DIGIT  -> [0-9];
+HEXDIG -> [0-9a-fA-F];
+
+ws -> [ \n\r]*;
+
