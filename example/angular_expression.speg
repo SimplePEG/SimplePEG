@@ -10,8 +10,8 @@ conditional  -> ws? (condition / binary / method / value) ws? "?" ws? trueExp ws
 condition ->  (binary / method / value) ws? condition_operation ws? (binary / method / value);
 condition_operation -> "===" / "==" / "!==" / "!=" / ">" / "<" ;
 
-trueExp -> conditional / binary / value;
-falseExp -> conditional / binary / value;
+trueExp -> conditional / binary / method / value;
+falseExp -> conditional / binary / method / value;
 
 method -> (method_call / method_call_with_args) ;
 method_call -> property_read "()" property_keyread_reader?;
